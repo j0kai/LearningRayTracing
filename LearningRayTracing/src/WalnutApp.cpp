@@ -15,12 +15,43 @@ public:
 	{
 		ImGui::Begin("Settings");
 		ImGui::Text("Last render: %.3fms", m_LastRenderTime);
-		if (ImGui::Button("Render"))
+		if(m_IsEditable)
 		{
-			Render();
+			if (ImGui::Button("Disable Editing"))
+					m_IsEditable = false;
 		}
+		else
+		{
+			if (ImGui::Button("Enable Editing"))
+				m_IsEditable = true;
+		}
+
 		ImGui::End();
 
+		if (m_IsEditable)
+		{
+			ImGui::Begin("Sphere Color Controller");
+			if (ImGui::ColorPicker3("Color Picker", m_SphereColorArr))
+			{
+				m_Renderer.SetSphereColor(glm::vec3(m_SphereColorArr[0], m_SphereColorArr[1], m_SphereColorArr[2]));
+			}
+			ImGui::End();
+
+			ImGui::Begin("Light Direction Controller");
+			if (ImGui::SliderFloat("X Axis", &m_LightDir.x, -5.0f, 5.0f))
+			{
+				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
+			}
+			if (ImGui::SliderFloat("Y Axis", &m_LightDir.y, -5.0f, 5.0f))
+			{
+				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
+			}
+			if (ImGui::SliderFloat("Z Axis", &m_LightDir.z, -5.0f, 5.0f))
+			{
+				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
+			}
+			ImGui::End();
+		}
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
@@ -48,10 +79,16 @@ public:
 
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
-
 private:
 	Renderer m_Renderer;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+
+	bool m_IsEditable = true;
+
+	glm::vec3 m_LightDir = m_Renderer.GetLightDirection();
+
+	glm::vec3 m_SphereColor = m_Renderer.GetSphereColor();
+	float m_SphereColorArr[3] { m_SphereColor.r, m_SphereColor.g, m_SphereColor.b };
 
 	float m_LastRenderTime = 0.0f;
 };
