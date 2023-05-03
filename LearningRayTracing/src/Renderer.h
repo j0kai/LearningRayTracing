@@ -5,24 +5,27 @@
 
 #include <memory>
 
+#include "Camera.h"
+#include "Ray.h"
+
 class Renderer
 {
 public:
 	Renderer()= default;
 
 	void OnResize(uint32_t width, uint32_t height);
-	void Render();
+	void Render(const Camera& camera);
 
 	std::shared_ptr<Walnut::Image> GetFinalImage() const { return m_FinalImage; }
 
-	const glm::vec3 GetSphereColor() const { return m_SphereColor; }
+	const glm::vec3& GetSphereColor() const { return m_SphereColor; }
 	void SetSphereColor(const glm::vec3& color) { m_SphereColor = color; }
 
-	const glm::vec3 GetLightDirection() const { return m_LightDirection; }
+	const glm::vec3& GetLightDirection() const { return m_LightDirection; }
 	void SetLightDirection(const glm::vec3& lightDir) { m_LightDirection = lightDir; }
 
 private:
-	glm::vec4 PerPixel(glm::vec2 coord);
+	glm::vec4 TraceRay(const Ray& ray);
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
