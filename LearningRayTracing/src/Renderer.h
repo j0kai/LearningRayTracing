@@ -1,20 +1,21 @@
 #pragma once
 
-#include "Walnut/Image.h"
-#include "glm/glm.hpp"
+#include <Walnut/Image.h>
+#include <glm/glm.hpp>
 
 #include <memory>
 
 #include "Camera.h"
 #include "Ray.h"
+#include "Scene.h"
 
 class Renderer
 {
 public:
-	Renderer()= default;
+	Renderer() = default;
 
 	void OnResize(uint32_t width, uint32_t height);
-	void Render(const Camera& camera);
+	void Render(const Scene& scene, const Camera& camera);
 
 	std::shared_ptr<Walnut::Image> GetFinalImage() const { return m_FinalImage; }
 
@@ -25,11 +26,12 @@ public:
 	void SetLightDirection(const glm::vec3& lightDir) { m_LightDirection = lightDir; }
 
 private:
-	glm::vec4 TraceRay(const Ray& ray);
+	glm::vec4 TraceRays(const Scene& scene, const Ray& ray);
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
 
-	glm::vec3 m_SphereColor{ 1.0f, 1.0f, 1.0f };
+	glm::vec3 m_SphereColor;
+
 	glm::vec3 m_LightDirection{ -1.0f, -1.0f, -1.0f };
 };

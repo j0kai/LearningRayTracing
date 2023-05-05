@@ -36,34 +36,64 @@ void Camera::OnUpdate(float ts)
 	// Movement
 	if (Input::IsKeyDown(KeyCode::W))
 	{
-		m_Position += m_ForwardDirection * speed * ts;
+		if(m_IsSpeedModified)
+			m_Position += m_ForwardDirection * (speed * 3.0f) * ts;
+		else
+			m_Position += m_ForwardDirection * speed * ts;
+		
 		moved = true;
 	}
 	else if (Input::IsKeyDown(KeyCode::A))
 	{
-		m_Position -= rightDirection * speed * ts;
+		if(m_IsSpeedModified)
+			m_Position -= rightDirection * (speed * 3.0f) * ts;
+		else
+			m_Position -= rightDirection * speed * ts;
+		
 		moved = true;
 	}
 	else if (Input::IsKeyDown(KeyCode::S))
 	{
-		m_Position -= m_ForwardDirection * speed * ts;
+		if(m_IsSpeedModified)
+			m_Position -= m_ForwardDirection * (speed * 3.0f) * ts;
+		else
+			m_Position -= m_ForwardDirection * speed * ts;
+		
 		moved = true;
 	}
 	else if (Input::IsKeyDown(KeyCode::D))
 	{
-		m_Position += rightDirection * speed * ts;
+		if(m_IsSpeedModified)
+			m_Position += rightDirection * (speed * 3.0f) * ts;
+		else
+			m_Position += rightDirection * speed * ts;
+		
 		moved = true;
 	}
+	if (Input::IsKeyDown(KeyCode::Q))
+	{
+		if(m_IsSpeedModified)
+			m_Position -= upDirection * (speed * 3.0f) * ts;
+		else
+			m_Position -= upDirection * speed * ts;
+		
+		moved = true;
+	}
+	else if (Input::IsKeyDown(KeyCode::E))
+	{
+		if(m_IsSpeedModified)
+			m_Position += upDirection * (speed * 3.0f) * ts;
+		else
+			m_Position += upDirection * speed * ts;
+		
+		moved = true;
+	}
+
+	//Speed Modifier
 	if (Input::IsKeyDown(KeyCode::LeftShift))
-	{
-		m_Position += upDirection * speed * ts;
-		moved = true;
-	}
-	else if (Input::IsKeyDown(KeyCode::LeftControl))
-	{
-		m_Position -= upDirection * speed * ts;
-		moved = true;
-	}
+		m_IsSpeedModified = true;
+	else
+		m_IsSpeedModified = false;
 
 	// Rotation
 	if (delta.x != 0.0f || delta.y != 0.0f)

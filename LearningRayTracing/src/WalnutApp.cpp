@@ -4,6 +4,8 @@
 #include "Walnut/Image.h"
 #include "Walnut/Timer.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Renderer.h"
 #include "Camera.h"
 
@@ -13,7 +15,24 @@ class ExampleLayer : public Walnut::Layer
 {
 public:
 	ExampleLayer()
-		:m_Camera(45.0f, 0.1f, 100.0f) {}
+		:m_Camera(45.0f, 0.1f, 1000.0f) 
+	{
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, 0.0f, 0.0f };
+			sphere.Radius = 0.5f;
+			sphere.Albedo = { 1.0f, 1.0f, 1.0f };
+			m_Scene.Spheres.push_back(sphere);
+		}
+
+		{
+			Sphere sphere;
+			sphere.Position = { 1.0f, 0.0f, -5.0f };
+			sphere.Radius = 1.5f;
+			sphere.Albedo = { 0.2f, 0.3f, 0.6f };
+			m_Scene.Spheres.push_back(sphere);
+		}
+	}
 
 	virtual void OnUpdate(float ts) override
 	{
@@ -39,26 +58,36 @@ public:
 
 		if (m_IsEditable)
 		{
-			ImGui::Begin("Sphere Color Controller");
-			if (ImGui::ColorPicker3("Color Picker", m_SphereColorArr))
+			ImGui::Begin("Sphere Properties");
+			
+			for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
 			{
-				m_Renderer.SetSphereColor(glm::vec3(m_SphereColorArr[0], m_SphereColorArr[1], m_SphereColorArr[2]));
+				ImGui::PushID(i);
+
+				Sphere& sphere = m_Scene.Spheres[i];
+				ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.05f);
+				ImGui::DragFloat("Radius", &sphere.Radius, 0.05f);
+				ImGui::ColorEdit3("Albedo", glm::value_ptr(sphere.Albedo));
+
+				ImGui::PopID();
 			}
+
 			ImGui::End();
 
 			ImGui::Begin("Light Direction Controller");
-			if (ImGui::SliderFloat("X Axis", &m_LightDir.x, -5.0f, 5.0f))
+			if (ImGui::DragFloat3("Light Direction", glm::value_ptr(m_LightDir), 0.1f, -10.0f, 10.0f))
 			{
 				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
 			}
-			if (ImGui::SliderFloat("Y Axis", &m_LightDir.y, -5.0f, 5.0f))
+			ImGui::End();
+
+			ImGui::Begin("Generate Sphere");
+			if (ImGui::Button("Generate Sphere"))
 			{
-				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
+				Sphere sphere;
+				m_Scene.Spheres.push_back(sphere);
 			}
-			if (ImGui::SliderFloat("Z Axis", &m_LightDir.z, -5.0f, 5.0f))
-			{
-				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
-			}
+
 			ImGui::End();
 		}
 
@@ -85,21 +114,19 @@ public:
 
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
-		m_Renderer.Render(m_Camera);
+		m_Renderer.Render(m_Scene, m_Camera);
 
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
 private:
 	Renderer m_Renderer;
 	Camera m_Camera;
+	Scene m_Scene;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 	bool m_IsEditable = true;
 
 	glm::vec3 m_LightDir = m_Renderer.GetLightDirection();
-
-	glm::vec3 m_SphereColor = m_Renderer.GetSphereColor();
-	float m_SphereColorArr[3] { m_SphereColor.r, m_SphereColor.g, m_SphereColor.b };
 
 	float m_LastRenderTime = 0.0f;
 };
