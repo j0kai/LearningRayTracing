@@ -46,12 +46,17 @@ public:
 		if(m_IsEditable)
 		{
 			if (ImGui::Button("Disable Editing"))
-					m_IsEditable = false;
+			{
+				m_IsEditable = false;
+			}
+				
 		}
 		else
 		{
 			if (ImGui::Button("Enable Editing"))
+			{
 				m_IsEditable = true;
+			}
 		}
 
 		ImGui::End();
