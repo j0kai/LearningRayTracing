@@ -66,13 +66,13 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 	glm::vec3 color(0.0f);
 	float multiplier = 1.0f;
 
-	int bounces = 2;
+	int bounces = 5;
 	for (int i = 0; i < bounces; i++)
 	{
 		Renderer::HitPayload payload = TraceRay(ray);
 		if (payload.HitDistance < 0.0f)
 		{
-			glm::vec3 skyColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 skyColor = glm::vec3(0.6f, 0.7f, 0.9f);
 			color += skyColor * multiplier;
 			break;
 		}
@@ -81,19 +81,21 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 		m_LightDirection = glm::normalize(m_LightDirection);
 
 		//float d = glm::max(glm::dot(payload.WorldNormal, -lightDir), 0.0f); // == cos(angle)
-		float d = glm::max(glm::dot(payload.WorldNormal, -m_LightDirection), 0.0f);
+		float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -m_LightDirection), 0.0f);
 
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
+		const Material& material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
-		glm::vec3 sphereColor = sphere.Albedo;
-		sphereColor *= d;
-		SetSphereColor(sphereColor);
+		glm::vec3 sphereColor = material.Albedo;
+		sphereColor *= lightIntensity;
+		m_SphereColor = sphereColor;
 		color += sphereColor * multiplier;
 
-		multiplier *= 0.7f;
+		multiplier *= 0.5f;
 
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
-		ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
+		ray.Direction = glm::reflect(ray.Direction,
+			payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f, -0.5f));
 	}
 
 
@@ -103,12 +105,14 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 
 Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 {
-	// (bx^2 + by^2)t^2 + (2(axbx + ayby))t + (ax^2 + ay^2 - r^2) = 0	// solving for t
-	// where
-	// a = ray origin
-	// b = ray direction
-	// r = radius
-	// t = hit distance
+	/*
+		(bx^2 + by^2)t^2 + (2(axbx + ayby))t + (ax^2 + ay^2 - r^2) = 0	// solving for t
+		where
+		a = ray origin
+		b = ray direction
+		r = radius
+		t = hit distance
+	*/
 
 	int closestSphere = -1;
 	float hitDistance = std::numeric_limits<float>::max();

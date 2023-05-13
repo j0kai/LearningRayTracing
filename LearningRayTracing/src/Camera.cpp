@@ -9,7 +9,7 @@ Camera::Camera(float verticalFOV, float zNear, float zFar)
 	:m_VerticalFOV(verticalFOV), m_NearClip(zNear), m_FarClip(zFar)
 {
 	m_ForwardDirection = glm::vec3(0, 0, -1);
-	m_Position = glm::vec3(0, 0, 3);
+	m_Position = glm::vec3(0, 0, 5);
 }
 
 void Camera::OnUpdate(float ts)
