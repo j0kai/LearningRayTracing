@@ -12,6 +12,11 @@
 class Renderer
 {
 public:
+	struct Settings
+	{
+		bool Accumulate = true;
+	};
+public:
 	Renderer() = default;
 
 	void OnResize(uint32_t width, uint32_t height);
@@ -19,12 +24,11 @@ public:
 
 	std::shared_ptr<Walnut::Image> GetFinalImage() const { return m_FinalImage; }
 
-	const glm::vec3& GetSphereColor() const { return m_SphereColor; }
-	void SetSphereColor(const glm::vec3& color) { m_SphereColor = color; }
+	void ResetFrameIndex() { m_FrameIndex = 1; }
+	Settings& GetSettings() { return m_Settings; }
 
-	const glm::vec3& GetLightDirection() const { return m_LightDirection; }
+	const glm::vec3& GetLightDirection()const { return m_LightDirection; }
 	void SetLightDirection(const glm::vec3& lightDir) { m_LightDirection = lightDir; }
-
 private:
 	struct HitPayload
 	{
@@ -42,12 +46,17 @@ private:
 	HitPayload Miss(const Ray& ray);
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
+	Settings m_Settings;
 
 	const Scene* m_ActiveScene = nullptr;
 	const Camera* m_ActiveCamera = nullptr;
 
 	uint32_t* m_ImageData = nullptr;
+	glm::vec4* m_AccumulationData = nullptr;
 
-	glm::vec3 m_SphereColor;
-	glm::vec3 m_LightDirection{ -1.0f, -1.0f, -1.0f };
+	uint32_t m_FrameIndex = 1;
+
+
+	glm::vec3 m_LightDirection = { -1.0f, -1.0f, -1.0f };
+
 };

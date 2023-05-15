@@ -15,7 +15,7 @@ class ExampleLayer : public Walnut::Layer
 {
 public:
 	ExampleLayer()
-		:m_Camera(45.0f, 0.1f, 1000.0f) 
+		:m_Camera(45.0f, 0.1f, 100.0f) 
 	{
 		Material& pinkSphere = m_Scene.Materials.emplace_back();
 		pinkSphere.Albedo = { 1.0f, 0.0f, 1.0f };
@@ -44,7 +44,8 @@ public:
 
 	virtual void OnUpdate(float ts) override
 	{
-		m_Camera.OnUpdate(ts);
+		if (m_Camera.OnUpdate(ts))
+			m_Renderer.ResetFrameIndex();
 	}
 
 	virtual void OnUIRender() override
@@ -71,6 +72,15 @@ public:
 
 		if (m_IsEditable)
 		{
+
+			ImGui::Begin("Path Tracing Accumulation");
+
+			ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
+			if (ImGui::Button("Reset"))
+				m_Renderer.ResetFrameIndex();
+			
+			ImGui::End();
+
 			ImGui::Begin("Sphere Properties");
 			
 			for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
@@ -101,13 +111,6 @@ public:
 				ImGui::PopID();
 			}
 
-			ImGui::End();
-
-			ImGui::Begin("Light Direction Controller");
-			if (ImGui::DragFloat3("Light Direction", glm::value_ptr(m_LightDir), 0.1f, -10.0f, 10.0f))
-			{
-				m_Renderer.SetLightDirection(glm::vec3(m_LightDir.x, m_LightDir.y, m_LightDir.z));
-			}
 			ImGui::End();
 
 			ImGui::Begin("Generate Sphere");
@@ -161,8 +164,6 @@ private:
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 	bool m_IsEditable = true;
-
-	glm::vec3 m_LightDir = m_Renderer.GetLightDirection();
 
 	float m_LastRenderTime = 0.0f;
 };
