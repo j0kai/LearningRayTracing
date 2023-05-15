@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Walnut/Image.h>
-#include <glm/glm.hpp>
-
-#include <memory>
 
 #include "Camera.h"
 #include "Ray.h"
 #include "Scene.h"
+
+#include <memory>
+#include <glm/glm.hpp>
 
 class Renderer
 {
@@ -26,9 +26,6 @@ public:
 
 	void ResetFrameIndex() { m_FrameIndex = 1; }
 	Settings& GetSettings() { return m_Settings; }
-
-	const glm::vec3& GetLightDirection()const { return m_LightDirection; }
-	void SetLightDirection(const glm::vec3& lightDir) { m_LightDirection = lightDir; }
 private:
 	struct HitPayload
 	{
@@ -55,8 +52,5 @@ private:
 	glm::vec4* m_AccumulationData = nullptr;
 
 	uint32_t m_FrameIndex = 1;
-
-
-	glm::vec3 m_LightDirection = { -1.0f, -1.0f, -1.0f };
 
 };

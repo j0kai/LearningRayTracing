@@ -12,8 +12,8 @@ public:
 	void OnResize(uint32_t width, uint32_t height);
 
 	const glm::mat4& GetProjection() const { return m_Projection; }
-	const glm::mat4& GetView() const { return m_View; }
 	const glm::mat4& GetInverseProjection() const { return m_InverseProjection; }
+	const glm::mat4& GetView() const { return m_View; }
 	const glm::mat4& GetInverseView() const { return m_InverseView; }
 
 	const glm::vec3& GetPosition() const { return m_Position; }
@@ -38,10 +38,8 @@ private:
 	float m_NearClip = 0.1f;
 	float m_FarClip = 100.0f;
 
-	glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 m_ForwardDirection = { 0.0f, 0.0f, 0.0f };
-
-	bool m_IsSpeedModified = false;
+	glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
+	glm::vec3 m_ForwardDirection{ 0.0f, 0.0f, 0.0f };
 
 	// Cached ray directions
 	std::vector<glm::vec3> m_RayDirections;

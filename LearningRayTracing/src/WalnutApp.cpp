@@ -52,83 +52,48 @@ public:
 	{
 		ImGui::Begin("Settings");
 		ImGui::Text("Last render: %.3fms", m_LastRenderTime);
-		if(m_IsEditable)
+		if (ImGui::Button("Render"))
 		{
-			if (ImGui::Button("Disable Editing"))
-			{
-				m_IsEditable = false;
-			}
-				
+			Render();
 		}
-		else
-		{
-			if (ImGui::Button("Enable Editing"))
-			{
-				m_IsEditable = true;
-			}
-		}
+
+		ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
+
+		if (ImGui::Button("Reset"))
+			m_Renderer.ResetFrameIndex();
 
 		ImGui::End();
 
-		if (m_IsEditable)
+		ImGui::Begin("Scene");
+		for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
 		{
+			ImGui::PushID(i);
 
-			ImGui::Begin("Path Tracing Accumulation");
+			Sphere& sphere = m_Scene.Spheres[i];
+			ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
+			ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
+			ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, (int)m_Scene.Materials.size() - 1);
 
-			ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
-			if (ImGui::Button("Reset"))
-				m_Renderer.ResetFrameIndex();
-			
-			ImGui::End();
+			ImGui::Separator();
 
-			ImGui::Begin("Sphere Properties");
-			
-			for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
-			{
-				ImGui::PushID(i);
-
-				Sphere& sphere = m_Scene.Spheres[i];
-				ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.05f);
-				ImGui::DragFloat("Radius", &sphere.Radius, 0.05f);
-				ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, (int)m_Scene.Materials.size() - 1);
-
-				ImGui::Separator();
-
-				ImGui::PopID();
-			}
-
-			for (size_t i = 0; i < m_Scene.Materials.size(); i++)
-			{
-				ImGui::PushID(i);
-
-				Material& material = m_Scene.Materials[i];
-				ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
-				ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
-				ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
-
-				ImGui::Separator();
-
-				ImGui::PopID();
-			}
-
-			ImGui::End();
-
-			ImGui::Begin("Generate Sphere");
-			if (ImGui::Button("Generate Sphere"))
-			{
-				Material newSphere;
-				newSphere.Albedo = { 1.0f, 1.0f, 1.0f };
-				newSphere.Roughness = 1.0f;
-				
-				Sphere sphere;
-				sphere.Position = { 0.0f, 0.0f, 0.0f };
-				sphere.Radius = 1.0f;
-				sphere.MaterialIndex = m_Scene.Materials.size();
-				m_Scene.Spheres.push_back(sphere);
-			}
-
-			ImGui::End();
+			ImGui::PopID();
 		}
+
+		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
+		{
+			ImGui::PushID(i);
+
+			Material& material = m_Scene.Materials[i];
+			ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
+			ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
+			ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
+
+			ImGui::Separator();
+
+			ImGui::PopID();
+		}
+
+		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
@@ -136,11 +101,10 @@ public:
 		m_ViewportWidth = ImGui::GetContentRegionAvail().x;
 		m_ViewportHeight = ImGui::GetContentRegionAvail().y;
 
-
 		auto image = m_Renderer.GetFinalImage();
 		if (image)
 			ImGui::Image(image->GetDescriptorSet(), { (float)image->GetWidth(), (float)image->GetHeight() }, ImVec2(0, 1), ImVec2(1, 0));
-		 
+
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -162,8 +126,6 @@ private:
 	Camera m_Camera;
 	Scene m_Scene;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-
-	bool m_IsEditable = true;
 
 	float m_LastRenderTime = 0.0f;
 };

@@ -12,7 +12,6 @@ namespace Utils {
 		uint8_t a = (uint8_t)(color.a * 255.0f);
 
 		uint32_t result = (a << 24) | (b << 16) | (g << 8) | r;
-
 		return result;
 	}
 
@@ -22,7 +21,7 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 {
 	if (m_FinalImage)
 	{
-		// Checks to see if resize is necessary, exits out of function if not 
+		// Checks to see if resize is necessary, returns if not 
 		if (m_FinalImage->GetWidth() == width && m_FinalImage->GetHeight() == height)
 			return;
 		
@@ -91,25 +90,21 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 			break;
 		}
 	
-		glm::vec3 lightDir = glm::normalize(glm::vec3( - 1, -1, -1));
-		//m_LightDirection = glm::normalize(m_LightDirection);
-
+		glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1));
 		float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDir), 0.0f); // == cos(angle)
-		//float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -m_LightDirection), 0.0f);
 
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
 		const Material& material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
 		glm::vec3 sphereColor = material.Albedo;
 		sphereColor *= lightIntensity;
-		//m_SphereColor = sphereColor;
 		color += sphereColor * multiplier;
 
 		multiplier *= 0.5f;
 
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
 		ray.Direction = glm::reflect(ray.Direction,
-			payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f, -0.5f));
+			payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
 	}
 	return glm::vec4(color, 1.0f);
 }
@@ -117,14 +112,12 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 
 Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 {
-	/*
-		(bx^2 + by^2)t^2 + (2(axbx + ayby))t + (ax^2 + ay^2 - r^2) = 0	// solving for t
-		where
-		a = ray origin
-		b = ray direction
-		r = radius
-		t = hit distance
-	*/
+	// (bx^2 + by^2)t^2 + (2(axbx + ayby))t + (ax^2 + ay^2 - r^2) = 0
+	// where
+	// a = ray origin
+	// b = ray direction
+	// r = radius
+	// t = hit distance
 
 	int closestSphere = -1;
 	float hitDistance = std::numeric_limits<float>::max();
@@ -140,7 +133,7 @@ Renderer::HitPayload Renderer::TraceRay(const Ray& ray)
 		// Quadratic formula discriminant:
 		// b^2 - 4ac
 
-		float discriminant = b * b - 4 * a * c;
+		float discriminant = b * b - 4.0f * a * c;
 		if (discriminant < 0.0f)
 			continue;
 
